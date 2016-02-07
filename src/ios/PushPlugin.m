@@ -471,11 +471,20 @@
     // Send result to trigger 'registration' event but keep callback
     NSMutableDictionary* message = [NSMutableDictionary dictionaryWithCapacity:1];
     [message setObject:token forKey:@"registrationId"];
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:message];
-    [pluginResult setKeepCallbackAsBool:YES];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
+
+	[[GGLInstanceID sharedInstance] getIDWithHandler:^(NSString *identity, NSError *error) {
+		[message setObject:identity forKey:@"instanceID"];
+
+		CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:message];
+		[pluginResult setKeepCallbackAsBool:YES];
+		[self returnResultsOfRegistration:pluginResult];
+	}];
+
 }
 
+-(void)returnResultsOfRegistration:(CDVPluginResult*)pluginResult; {
+	[self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
+}
 
 -(void)failWithMessage:(NSString *)message withError:(NSError *)error
 {
