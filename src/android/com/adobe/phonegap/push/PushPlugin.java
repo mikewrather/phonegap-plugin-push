@@ -55,6 +55,7 @@ public class PushPlugin extends CordovaPlugin implements PushConstants {
                     SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(COM_ADOBE_PHONEGAP_PUSH, Context.MODE_PRIVATE);
                     String token = null;
                     String senderID = null;
+                    String iid = null;
 
                     try {
                         jo = data.getJSONObject(0).getJSONObject(ANDROID);
@@ -67,22 +68,30 @@ public class PushPlugin extends CordovaPlugin implements PushConstants {
 
                         String savedSenderID = sharedPref.getString(SENDER_ID, "");
                         String savedRegID = sharedPref.getString(REGISTRATION_ID, "");
+                        String savedInstanceID = sharedPref.getString(INSTNACE_ID, "");
 
                         // first time run get new token
                         if ("".equals(savedRegID)) {
-                            token = InstanceID.getInstance(getApplicationContext()).getToken(senderID, GCM);
+                            InstanceID instanceID = InstanceID.getInstance(getApplicationContext());
+                            token = instanceID.getToken(senderID, GCM);
+                            iid = instanceID.getId();
                         }
                         // new sender ID, re-register
                         else if (!savedSenderID.equals(senderID)) {
-                            token = InstanceID.getInstance(getApplicationContext()).getToken(senderID, GCM);
+                            InstanceID instanceID = InstanceID.getInstance(getApplicationContext());
+                            token = instanceID.getToken(senderID, GCM);
+                            iid = instanceID.getId();
                         }
                         // use the saved one
                         else {
                             token = sharedPref.getString(REGISTRATION_ID, "");
+                            iid = sharedPref.getString(INSTNACE_ID, "");
                         }
 
                         if (!"".equals(token)) {
-                            JSONObject json = new JSONObject().put(REGISTRATION_ID, token);
+                            JSONObject json = new JSONObject();
+                            json.put(REGISTRATION_ID, token);
+                            json.put(INSTANCE_ID, iid);
 
                             Log.v(LOG_TAG, "onRegistered: " + json.toString());
 
@@ -120,6 +129,7 @@ public class PushPlugin extends CordovaPlugin implements PushConstants {
                         editor.putBoolean(FORCE_SHOW, jo.optBoolean(FORCE_SHOW, false));
                         editor.putString(SENDER_ID, senderID);
                         editor.putString(REGISTRATION_ID, token);
+                        editor.putString(INSTANCE_ID, iid);
                         editor.commit();
                     }
 
@@ -151,6 +161,7 @@ public class PushPlugin extends CordovaPlugin implements PushConstants {
                             editor.remove(FORCE_SHOW);
                             editor.remove(SENDER_ID);
                             editor.remove(REGISTRATION_ID);
+                            editor.remove(INSTANCE_ID);
                             editor.commit();
                         }
 

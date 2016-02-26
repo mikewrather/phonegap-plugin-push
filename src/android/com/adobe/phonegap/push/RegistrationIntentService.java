@@ -33,6 +33,7 @@ public class RegistrationIntentService extends IntentService implements PushCons
             // save new token
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString(REGISTRATION_ID, token);
+            editor.putString(INSTANCE_ID, instanceID.getId());
             editor.commit();
 
         } catch (Exception e) {
