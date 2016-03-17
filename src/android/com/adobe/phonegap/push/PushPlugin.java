@@ -85,7 +85,7 @@ public class PushPlugin extends CordovaPlugin implements PushConstants {
                         // use the saved one
                         else {
                             token = sharedPref.getString(REGISTRATION_ID, "");
-                            iid = sharedPref.getString(INSTNACE_ID, "");
+                            iid = sharedPref.getString(INSTANCE_ID, "");
                         }
 
                         if (!"".equals(token)) {
